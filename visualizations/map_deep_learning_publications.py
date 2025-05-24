@@ -7,34 +7,36 @@ import os
 # Load publication data
 df = pd.read_csv("data/raw/deep_learning_publication_counts.csv")
 
-# Get most recent year for map (e.g., 2020)
+# Get latest year (2020)
 latest_year = df["year"].max()
-df_latest = df[df["year"] == latest_year]
+df_latest = df[df["year"] == latest_year].copy()
 
-# Standardize country codes (ISO3)
+# Extract alpha-2 country code (e.g., "KR" from "https://openalex.org/countries/KR")
+df_latest["alpha_2"] = df_latest["country_code"].apply(lambda x: x.split("/")[-1])
+
+# Map Alpha-2 → Alpha-3
 def alpha2_to_alpha3():
-    # Use ISO conversion JSON from public repo (or load locally)
     url = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.json"
     response = requests.get(url)
-    country_map = {}
-    for country in response.json():
-        country_map[country["alpha-2"]] = country["alpha-3"]
-    return country_map
+    data = response.json()
+    mapping = {item["alpha-2"]: item["alpha-3"] for item in data}
+    return mapping
 
-alpha2_3 = alpha2_to_alpha3()
-df_latest["iso_a3"] = df_latest["country_code"].map(alpha2_3)
+alpha_map = alpha2_to_alpha3()
+df_latest["iso_a3"] = df_latest["alpha_2"].map(alpha_map)
 
-# Remove missing country codes
+# Drop any missing iso_a3
 df_latest = df_latest.dropna(subset=["iso_a3"])
 
-# Load GeoJSON file for countries
-world_geo = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json"
+# Load geojson
+geo_url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json"
 
-# Create Folium Map
+# Create map
 m = folium.Map(location=[20, 0], zoom_start=2)
 
 folium.Choropleth(
-    geo_data=world_geo,
+    geo_data=geo_url,
+    name="choropleth",
     data=df_latest,
     columns=["iso_a3", "count"],
     key_on="feature.id",
@@ -46,7 +48,7 @@ folium.Choropleth(
 
 # Save map
 os.makedirs("visualizations/outputs", exist_ok=True)
-output_file = "visualizations/outputs/deep_learning_map_2020.html"
-m.save(output_file)
+output_path = "visualizations/outputs/deep_learning_map_2020.html"
+m.save(output_path)
 
-print(f"Map saved to {output_file}")
+print(f"Map saved to {output_path}")
