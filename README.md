@@ -19,3 +19,17 @@ Script: `visualizations/map_deep_learning_publications.py`
 - Loads the publication count CSV
 - Uses `folium` to generate a choropleth map of publication counts by country for the year 2020
 - Output: `visualizations/outputs/deep_learning_map_2020.html`
+
+### 2. Deep Learning Growth (2010–2020)
+
+Script: `scripts/analyze_growth.py`
+
+- Calculates percentage growth in publication counts from 2010 to 2020 for each country.
+- Output: `data/raw/deep_learning_growth_2010_2020.csv`
+
+### 3. Top 5 Growth Countries Chart
+
+Script: `visualizations/top_growth_countries.py`
+
+- Plots a bar chart for the top 5 countries with highest growth in Deep Learning research output.
+- Output: `visualizations/outputs/top5_growth_dl.png`
