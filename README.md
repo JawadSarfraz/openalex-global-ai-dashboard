@@ -33,3 +33,16 @@ Script: `visualizations/top_growth_countries.py`
 
 - Plots a bar chart for the top 5 countries with highest growth in Deep Learning research output.
 - Output: `visualizations/outputs/top5_growth_dl.png`
+
+---
+
+## 🔄 AI Concept Analysis (`C154945302`)
+
+### Scripts Added:
+
+- `scripts/fetch_publication_counts_ai.py`: Fetches AI publication data (2010–2020) from OpenAlex.
+- `scripts/analyze_growth_ai.py`: Computes growth rates for AI publications.
+- `visualizations/ai_map_2020.py`: World map of AI publications in 2020.
+- `visualizations/top_growth_countries_ai.py`: Bar chart of top 5 countries by AI growth.
+- `visualizations/line_trend_countries.py`: Line chart for US, China, Germany research trends in AI and Deep Learning.
+- `dashboard/app.py`: Streamlit-based dashboard to unify all components.
