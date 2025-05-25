@@ -75,3 +75,11 @@ Script: `visualizations/top_growth_countries_ai.py`
 
 - Visualizes the top 5 countries by AI publication growth over the last decade.
 - Output: `visualizations/outputs/top5_growth_ai.png`
+
+### 5. Country Comparison: AI vs Deep Learning Trends
+
+Script: `visualizations/line_trend_countries.py`
+
+- Compares year-wise publication counts from 2010 to 2020 for US, China, and Germany.
+- Covers both AI and Deep Learning fields.
+- Output: `visualizations/outputs/line_trend_us_cn_de.png`
