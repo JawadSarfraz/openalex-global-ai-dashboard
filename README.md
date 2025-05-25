@@ -61,3 +61,10 @@ Script: `scripts/analyze_growth_ai.py`
 
 - Calculates percentage growth in AI publication counts from 2010 to 2020.
 - Output: `data/raw/ai_growth_2010_2020.csv`
+
+### 3. AI World Map (2020)
+
+Script: `visualizations/ai_map_2020.py`
+
+- Generates a world map of AI research output by country for 2020.
+- Output: `visualizations/outputs/ai_map_2020.html`
