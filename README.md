@@ -54,3 +54,10 @@ Script: `scripts/fetch_publication_counts_ai.py`
 - Fetches publication counts from OpenAlex API for concept: **Artificial Intelligence (C154945302)**
 - Groups by country per year (2010–2020)
 - Output CSV stored in: `data/raw/ai_publication_counts.csv`
+
+### 2. AI Growth Analysis (2010–2020)
+
+Script: `scripts/analyze_growth_ai.py`
+
+- Calculates percentage growth in AI publication counts from 2010 to 2020.
+- Output: `data/raw/ai_growth_2010_2020.csv`
