@@ -68,3 +68,10 @@ Script: `visualizations/ai_map_2020.py`
 
 - Generates a world map of AI research output by country for 2020.
 - Output: `visualizations/outputs/ai_map_2020.html`
+
+### 4. Top 5 AI Growth Countries (2010–2020)
+
+Script: `visualizations/top_growth_countries_ai.py`
+
+- Visualizes the top 5 countries by AI publication growth over the last decade.
+- Output: `visualizations/outputs/top5_growth_ai.png`
