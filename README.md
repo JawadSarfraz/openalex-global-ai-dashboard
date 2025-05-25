@@ -46,3 +46,11 @@ Script: `visualizations/top_growth_countries.py`
 - `visualizations/top_growth_countries_ai.py`: Bar chart of top 5 countries by AI growth.
 - `visualizations/line_trend_countries.py`: Line chart for US, China, Germany research trends in AI and Deep Learning.
 - `dashboard/app.py`: Streamlit-based dashboard to unify all components.
+
+### 1. Fetch AI Publication Counts
+
+Script: `scripts/fetch_publication_counts_ai.py`
+
+- Fetches publication counts from OpenAlex API for concept: **Artificial Intelligence (C154945302)**
+- Groups by country per year (2010–2020)
+- Output CSV stored in: `data/raw/ai_publication_counts.csv`
