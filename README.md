@@ -83,3 +83,20 @@ Script: `visualizations/line_trend_countries.py`
 - Compares year-wise publication counts from 2010 to 2020 for US, China, and Germany.
 - Covers both AI and Deep Learning fields.
 - Output: `visualizations/outputs/line_trend_us_cn_de.png`
+
+---
+
+## Streamlit Dashboard
+
+Script: `dashboard/app.py`
+
+- Provides an interactive UI for exploring AI and Deep Learning trends.
+- Includes:
+  - World map (2020)
+  - Top 5 growth chart
+  - Country-wise trends (US, CN, DE)
+- To run the dashboard:
+
+```bash
+streamlit run dashboard/app.py
+```
