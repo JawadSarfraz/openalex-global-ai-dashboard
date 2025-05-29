@@ -9,15 +9,18 @@ st.title("📊 Global Research Dashboard: AI & Deep Learning (2010–2020)")
 # Field Selector
 field = st.selectbox("Select Field of Research", ["Artificial Intelligence", "Deep Learning"])
 
-# --- Year Selector for DL ---
-if field == "Deep Learning":
-    selected_year = st.slider("Select Year", min_value=2010, max_value=2020, value=2020)
-    map_file = f"visualizations/outputs/maps_dl_by_year/dl_map_{selected_year}.html"
-else:
-    map_file = "visualizations/outputs/ai_map_2020.html"
+# --- Year Selector (For both fields) ---
+selected_year = st.slider("Select Year", min_value=2010, max_value=2020, value=2020)
+
+# Determine the correct HTML map file path
+map_file = (
+    f"visualizations/outputs/maps_ai_by_year/ai_map_{selected_year}.html"
+    if field == "Artificial Intelligence"
+    else f"visualizations/outputs/maps_dl_by_year/dl_map_{selected_year}.html"
+)
 
 # World Map Display
-st.subheader(f"🌍 World Map ({'2020' if field == 'Artificial Intelligence' else selected_year}) - {field}")
+st.subheader(f"🌍 World Map ({selected_year}) - {field}")
 with open(map_file, "r", encoding="utf-8") as f:
     html = f.read()
 st.components.v1.html(html, height=600, scrolling=True)
@@ -25,7 +28,7 @@ st.components.v1.html(html, height=600, scrolling=True)
 # Divider
 st.markdown("---")
 
-# Top 5 Growth Chart
+# Top 5 Growth Chart (2020 only – you can later adapt this dynamically too if needed)
 growth_img = {
     "Artificial Intelligence": "visualizations/outputs/top5_growth_ai.png",
     "Deep Learning": "visualizations/outputs/top5_growth_dl.png"
