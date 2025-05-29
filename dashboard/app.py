@@ -9,28 +9,32 @@ st.title("📊 Global Research Dashboard: AI & Deep Learning (2010–2020)")
 # Field Selector
 field = st.selectbox("Select Field of Research", ["Artificial Intelligence", "Deep Learning"])
 
-# --- Year Selector (For both fields) ---
+# Year Selector (used for both, but maps exist only for DL)
 selected_year = st.slider("Select Year", min_value=2010, max_value=2020, value=2020)
 
-# Determine the correct HTML map file path
-# Corrected Map File Path Logic
-map_file = (
-    f"visualizations/outputs/ai_map_{selected_year}.html"
-    if field == "Artificial Intelligence"
-    else f"visualizations/outputs/maps_dl_by_year/dl_map_{selected_year}.html"
-)
-
+# Map file logic
+if field == "Artificial Intelligence":
+    if selected_year == 2020:
+        map_file = "visualizations/outputs/ai_map_2020.html"
+    else:
+        st.warning(f"⚠️ No AI map available for {selected_year}. Showing 2020 map instead.")
+        map_file = "visualizations/outputs/ai_map_2020.html"
+else:
+    map_file = f"visualizations/outputs/maps_dl_by_year/dl_map_{selected_year}.html"
 
 # World Map Display
 st.subheader(f"🌍 World Map ({selected_year}) - {field}")
-with open(map_file, "r", encoding="utf-8") as f:
-    html = f.read()
-st.components.v1.html(html, height=600, scrolling=True)
+try:
+    with open(map_file, "r", encoding="utf-8") as f:
+        html = f.read()
+    st.components.v1.html(html, height=600, scrolling=True)
+except FileNotFoundError:
+    st.error(f"Map file not found for {selected_year}. Please check data availability.")
 
 # Divider
 st.markdown("---")
 
-# Top 5 Growth Chart (2020 only – you can later adapt this dynamically too if needed)
+# Top 5 Growth Chart (2020 only)
 growth_img = {
     "Artificial Intelligence": "visualizations/outputs/top5_growth_ai.png",
     "Deep Learning": "visualizations/outputs/top5_growth_dl.png"
