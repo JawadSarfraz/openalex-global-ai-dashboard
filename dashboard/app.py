@@ -13,14 +13,20 @@ field = st.selectbox("Select Field of Research", ["Artificial Intelligence", "De
 selected_year = st.slider("Select Year", min_value=2010, max_value=2020, value=2020)
 
 # Map file logic
+# if field == "Artificial Intelligence":
+#     if selected_year == 2020:
+#         map_file = "visualizations/outputs/ai_map_2020.html"
+#     else:
+#         st.warning(f"⚠️ No AI map available for {selected_year}. Showing 2020 map instead.")
+#         map_file = "visualizations/outputs/ai_map_2020.html"
+# else:
+#     map_file = f"visualizations/outputs/maps_dl_by_year/dl_map_{selected_year}.html"
+
 if field == "Artificial Intelligence":
-    if selected_year == 2020:
-        map_file = "visualizations/outputs/ai_map_2020.html"
-    else:
-        st.warning(f"⚠️ No AI map available for {selected_year}. Showing 2020 map instead.")
-        map_file = "visualizations/outputs/ai_map_2020.html"
+    map_file = f"visualizations/outputs/maps_ai_by_year/ai_map_{selected_year}.html"
 else:
     map_file = f"visualizations/outputs/maps_dl_by_year/dl_map_{selected_year}.html"
+
 
 # World Map Display
 st.subheader(f"🌍 World Map ({selected_year}) - {field}")
