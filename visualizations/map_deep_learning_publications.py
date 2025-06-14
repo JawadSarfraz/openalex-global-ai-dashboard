@@ -1,54 +1,54 @@
-import folium
 import pandas as pd
-import json
+import folium
 import requests
 import os
 
-# Load publication data
-df = pd.read_csv("data/raw/deep_learning_publication_counts.csv")
+# --- SETTINGS ---
+YEAR_FROM = 2015
+YEAR_TO = 2018
+INPUT_CSV = "data/raw/deep_learning_publication_counts.csv"
+OUTPUT_PATH = f"visualizations/outputs/aggregated_dl_map_{YEAR_FROM}_{YEAR_TO}.html"
 
-# Get latest year (2020)
-latest_year = df["year"].max()
-df_latest = df[df["year"] == latest_year].copy()
+# Load data
+df = pd.read_csv(INPUT_CSV)
 
-# Extract alpha-2 country code (e.g., "KR" from "https://openalex.org/countries/KR")
-df_latest["alpha_2"] = df_latest["country_code"].apply(lambda x: x.split("/")[-1])
+# Extract Alpha-2 country codes
+df["alpha_2"] = df["country_code"].apply(lambda x: x.split("/")[-1])
 
-# Map Alpha-2 → Alpha-3
+# Convert Alpha-2 to Alpha-3 codes
 def alpha2_to_alpha3():
     url = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.json"
-    response = requests.get(url)
-    data = response.json()
-    mapping = {item["alpha-2"]: item["alpha-3"] for item in data}
-    return mapping
+    res = requests.get(url)
+    return {entry["alpha-2"]: entry["alpha-3"] for entry in res.json()}
 
-alpha_map = alpha2_to_alpha3()
-df_latest["iso_a3"] = df_latest["alpha_2"].map(alpha_map)
+iso_map = alpha2_to_alpha3()
+df["iso_a3"] = df["alpha_2"].map(iso_map)
+df = df.dropna(subset=["iso_a3"])
 
-# Drop any missing iso_a3
-df_latest = df_latest.dropna(subset=["iso_a3"])
+# Filter by year range
+df_range = df[(df["year"] >= YEAR_FROM) & (df["year"] <= YEAR_TO)]
 
-# Load geojson
+# Aggregate by iso_a3
+df_agg = df_range.groupby("iso_a3")["count"].sum().reset_index()
+
+# Load GeoJSON
 geo_url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json"
 
-# Create map
+# Generate map
 m = folium.Map(location=[20, 0], zoom_start=2)
-
 folium.Choropleth(
     geo_data=geo_url,
     name="choropleth",
-    data=df_latest,
+    data=df_agg,
     columns=["iso_a3", "count"],
     key_on="feature.id",
     fill_color="YlGnBu",
     fill_opacity=0.7,
     line_opacity=0.2,
-    legend_name=f"Deep Learning Publications in {latest_year}",
+    legend_name=f"DL Publications ({YEAR_FROM}–{YEAR_TO})"
 ).add_to(m)
 
-# Save map
-os.makedirs("visualizations/outputs", exist_ok=True)
-output_path = "visualizations/outputs/deep_learning_map_2020.html"
-m.save(output_path)
-
-print(f"Map saved to {output_path}")
+# Save output
+os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+m.save(OUTPUT_PATH)
+print(f"✅ Aggregated map saved to: {OUTPUT_PATH}")
