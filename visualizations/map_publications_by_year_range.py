@@ -1,54 +1,45 @@
-import folium
 import pandas as pd
-import json
-import requests
+import folium
 import os
+import requests
 
-# Load publication data
-df = pd.read_csv("data/raw/deep_learning_publication_counts.csv")
-
-# Get latest year (2020)
-latest_year = df["year"].max()
-df_latest = df[df["year"] == latest_year].copy()
-
-# Extract alpha-2 country code (e.g., "KR" from "https://openalex.org/countries/KR")
-df_latest["alpha_2"] = df_latest["country_code"].apply(lambda x: x.split("/")[-1])
-
-# Map Alpha-2 → Alpha-3
-def alpha2_to_alpha3():
+def alpha2_to_alpha3_map():
     url = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.json"
-    response = requests.get(url)
-    data = response.json()
-    mapping = {item["alpha-2"]: item["alpha-3"] for item in data}
-    return mapping
+    resp = requests.get(url)
+    return {item["alpha-2"]: item["alpha-3"] for item in resp.json()}
 
-alpha_map = alpha2_to_alpha3()
-df_latest["iso_a3"] = df_latest["alpha_2"].map(alpha_map)
+def generate_range_maps(df, label, output_dir):
+    df["alpha_2"] = df["country_code"].apply(lambda x: x.split("/")[-1])
+    iso_map = alpha2_to_alpha3_map()
+    df["iso_a3"] = df["alpha_2"].map(iso_map)
+    df = df.dropna(subset=["iso_a3"])
 
-# Drop any missing iso_a3
-df_latest = df_latest.dropna(subset=["iso_a3"])
+    os.makedirs(output_dir, exist_ok=True)
+    geo_url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json"
 
-# Load geojson
-geo_url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json"
+    for start in range(2010, 2020):
+        for end in range(start + 1, 2021):
+            df_range = df[(df["year"] >= start) & (df["year"] <= end)]
+            agg_df = df_range.groupby("iso_a3")["count"].sum().reset_index()
 
-# Create map
-m = folium.Map(location=[20, 0], zoom_start=2)
+            m = folium.Map(location=[20, 0], zoom_start=2)
+            folium.Choropleth(
+                geo_data=geo_url,
+                data=agg_df,
+                columns=["iso_a3", "count"],
+                key_on="feature.id",
+                fill_color="YlGnBu",
+                fill_opacity=0.7,
+                line_opacity=0.2,
+                legend_name=f"{label} Publications ({start}–{end})"
+            ).add_to(m)
 
-folium.Choropleth(
-    geo_data=geo_url,
-    name="choropleth",
-    data=df_latest,
-    columns=["iso_a3", "count"],
-    key_on="feature.id",
-    fill_color="YlGnBu",
-    fill_opacity=0.7,
-    line_opacity=0.2,
-    legend_name=f"Deep Learning Publications in {latest_year}",
-).add_to(m)
+            m.save(f"{output_dir}/{label.lower().replace(' ', '_')}_map_{start}_{end}.html")
+            print(f"✅ Saved: {label} {start}–{end}")
 
-# Save map
-os.makedirs("visualizations/outputs", exist_ok=True)
-output_path = "visualizations/outputs/deep_learning_map_2020.html"
-m.save(output_path)
+# Load datasets
+df_ai = pd.read_csv("data/raw/ai_publication_counts.csv")
+df_dl = pd.read_csv("data/raw/deep_learning_publication_counts.csv")
 
-print(f"Map saved to {output_path}")
+generate_range_maps(df_ai, "AI", "visualizations/outputs/maps_ai_by_year_range")
+generate_range_maps(df_dl, "Deep Learning", "visualizations/outputs/maps_dl_by_year_range")
