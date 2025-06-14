@@ -60,7 +60,7 @@ st.image(trend_img, use_container_width=True)
 st.markdown("---")
 
 # CSV Download
-st.subheader("📥 Download Filtered Data (CSV)")
+st.subheader("📅 Download Filtered Data (CSV)")
 ai_csv = "data/raw/ai_publication_counts.csv"
 dl_csv = "data/raw/deep_learning_publication_counts.csv"
 
