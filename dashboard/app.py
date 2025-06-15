@@ -27,13 +27,15 @@ data_load_state.text("✓ Live data loaded successfully")
 if "country_code" in df_live.columns:
     df_live["country_code"] = df_live["country_code"].apply(lambda x: x.split("/")[-1] if isinstance(x, str) else x)
 
+# Map readable country names
 alpha2_to_name = {
     "US": "United States", "CN": "China", "DE": "Germany", "IN": "India", "GB": "United Kingdom",
     "FR": "France", "JP": "Japan", "KR": "South Korea", "IT": "Italy", "ES": "Spain",
     "CA": "Canada", "AU": "Australia", "BR": "Brazil", "RU": "Russia", "NL": "Netherlands",
     "CH": "Switzerland", "SE": "Sweden", "PL": "Poland", "TR": "Turkey", "IR": "Iran",
-    # Extend this list based on future data
+    # Add more as needed
 }
+df_live["country_name"] = df_live["country_code"].map(alpha2_to_name).fillna(df_live["country_code"])
 
 # Handle empty API response
 if df_live.empty:
@@ -41,9 +43,7 @@ if df_live.empty:
 else:
     # Show World Map (placeholder for now)
     st.subheader(f"\U0001F30D Publications by Country ({year_from}–{year_to}) - {field}")
-    #st.dataframe(df_live.sort_values(by="count", ascending=False).reset_index(drop=True))
     st.dataframe(df_live[["country_name", "count"]].sort_values(by="count", ascending=False).reset_index(drop=True))
-
 
     # Divider
     st.markdown("---")
@@ -70,12 +70,6 @@ else:
 
     # CSV Download
     st.subheader("\U0001F4E5 Download Fetched Data (CSV)")
-    # st.download_button(
-    #     label=f"Download {field} Data ({year_from}–{year_to}) as CSV",
-    #     data=df_live.to_csv(index=False).encode('utf-8'),
-    #     file_name=f"{field.lower().replace(' ', '_')}_openalex_{year_from}_{year_to}.csv",
-    #     mime="text/csv"
-    # )
     st.download_button(
         label=f"Download {field} Data ({year_from}–{year_to}) as CSV",
         data=df_live[["country_name", "count"]].to_csv(index=False).encode('utf-8'),
