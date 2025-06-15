@@ -1,87 +1,110 @@
 # OpenAlex Global AI Dashboard
 
-## Scripts
+## Overview
+
+This project visualizes global research trends in **Artificial Intelligence** and **Deep Learning** using OpenAlex data. It supports both static snapshot analysis (CSV and HTML maps) and **live querying** from the OpenAlex API. The dashboard is implemented using **Streamlit**.
+
+---
+
+## Concepts Analyzed
+
+- **Artificial Intelligence (C154945302)**
+- **Deep Learning (C108583219)**
+
+---
+
+## Folder Structure
+
+```
+openalex-global-ai-dashboard/
+├── dashboard/               # Streamlit app
+│   └── app.py               # Main dashboard entry point
+├── data/
+│   └── raw/                 # Raw CSVs fetched from OpenAlex
+├── scripts/                 # Data fetching and growth analysis scripts
+├── services/                # Live API integration modules
+│   └── openalex_api.py      # Query OpenAlex with filters
+├── visualizations/          # Scripts to generate visualizations
+│   └── outputs/             # Charts and map HTMLs
+```
+
+---
+
+## OpenAlex Live API Integration (NEW)
+
+Script: `services/openalex_api.py`
+
+- Dynamically fetches publication data from OpenAlex using `mailto`-compliant headers.
+- Accepts:
+
+  - Concept ID (AI or DL)
+  - Year range (from slider input)
+
+- Aggregates publication counts by country.
+- Used by `dashboard/app.py` to show real-time data tables and CSV downloads.
+
+---
+
+## Data Fetching Scripts (Static CSV Mode)
 
 ### 1. Fetch Deep Learning Publication Counts
 
 Script: `scripts/fetch_publication_counts.py`
 
-- Fetches publication counts from OpenAlex API for concept: **Deep Learning (C108583219)**
+- Concept: Deep Learning (C108583219)
 - Groups by country per year (2010–2020)
-- Output CSV stored in: `data/raw/deep_learning_publication_counts.csv`
+- Output: `data/raw/deep_learning_publication_counts.csv`
 
-## Visualizations
-
-### 1. Deep Learning World Map
-
-Script: `visualizations/map_deep_learning_publications.py`
-
-- Loads the publication count CSV
-- Uses `folium` to generate a choropleth map of publication counts by country for the year 2020
-- Output: `visualizations/outputs/deep_learning_map_2020.html`
-
-### 2. Deep Learning Growth (2010–2020)
-
-Script: `scripts/analyze_growth.py`
-
-- Calculates percentage growth in publication counts from 2010 to 2020 for each country.
-- Output: `data/raw/deep_learning_growth_2010_2020.csv`
-
-### 3. Top 5 Growth Countries Chart
-
-Script: `visualizations/top_growth_countries.py`
-
-- Plots a bar chart for the top 5 countries with highest growth in Deep Learning research output.
-- Output: `visualizations/outputs/top5_growth_dl.png`
-
----
-
-## 🔄 AI Concept Analysis (`C154945302`)
-
-### Scripts Added:
-
-- `scripts/fetch_publication_counts_ai.py`: Fetches AI publication data (2010–2020) from OpenAlex.
-- `scripts/analyze_growth_ai.py`: Computes growth rates for AI publications.
-- `visualizations/ai_map_2020.py`: World map of AI publications in 2020.
-- `visualizations/top_growth_countries_ai.py`: Bar chart of top 5 countries by AI growth.
-- `visualizations/line_trend_countries.py`: Line chart for US, China, Germany research trends in AI and Deep Learning.
-- `dashboard/app.py`: Streamlit-based dashboard to unify all components.
-
-### 1. Fetch AI Publication Counts
+### 2. Fetch AI Publication Counts
 
 Script: `scripts/fetch_publication_counts_ai.py`
 
-- Fetches publication counts from OpenAlex API for concept: **Artificial Intelligence (C154945302)**
+- Concept: AI (C154945302)
 - Groups by country per year (2010–2020)
-- Output CSV stored in: `data/raw/ai_publication_counts.csv`
+- Output: `data/raw/ai_publication_counts.csv`
 
-### 2. AI Growth Analysis (2010–2020)
+---
+
+## Growth Analysis Scripts
+
+### 1. Deep Learning Growth (2010–2020)
+
+Script: `scripts/analyze_growth.py`
+
+- Calculates % growth in publication counts (2010–2020)
+- Output: `data/raw/deep_learning_growth_2010_2020.csv`
+
+### 2. AI Growth (2010–2020)
 
 Script: `scripts/analyze_growth_ai.py`
 
-- Calculates percentage growth in AI publication counts from 2010 to 2020.
 - Output: `data/raw/ai_growth_2010_2020.csv`
 
-### 3. AI World Map (2020)
+---
+
+## Visualization Scripts
+
+### 1. Deep Learning World Map (2020)
+
+Script: `visualizations/map_deep_learning_publications.py`
+
+- Output: `visualizations/outputs/deep_learning_map_2020.html`
+
+### 2. AI World Map (2020)
 
 Script: `visualizations/ai_map_2020.py`
 
-- Generates a world map of AI research output by country for 2020.
 - Output: `visualizations/outputs/ai_map_2020.html`
 
-### 4. Top 5 AI Growth Countries (2010–2020)
+### 3. Top 5 Growth Charts
 
-Script: `visualizations/top_growth_countries_ai.py`
+- Deep Learning: `visualizations/top_growth_countries.py` ➞ `top5_growth_dl.png`
+- AI: `visualizations/top_growth_countries_ai.py` ➞ `top5_growth_ai.png`
 
-- Visualizes the top 5 countries by AI publication growth over the last decade.
-- Output: `visualizations/outputs/top5_growth_ai.png`
-
-### 5. Country Comparison: AI vs Deep Learning Trends
+### 4. Trends in US, CN, DE
 
 Script: `visualizations/line_trend_countries.py`
 
-- Compares year-wise publication counts from 2010 to 2020 for US, China, and Germany.
-- Covers both AI and Deep Learning fields.
 - Output: `visualizations/outputs/line_trend_us_cn_de.png`
 
 ---
@@ -90,13 +113,33 @@ Script: `visualizations/line_trend_countries.py`
 
 Script: `dashboard/app.py`
 
-- Provides an interactive UI for exploring AI and Deep Learning trends.
-- Includes:
-  - World map (2020)
-  - Top 5 growth chart
-  - Country-wise trends (US, CN, DE)
-- To run the dashboard:
+Features:
+
+- Dynamic year range selector (2010–2020)
+- Realtime data fetch from OpenAlex
+- DataFrame view + CSV export
+- Static map visualizations (2020)
+- Growth charts and trendlines
+
+### Run the Dashboard
 
 ```bash
 streamlit run dashboard/app.py
 ```
+
+---
+
+## Next Steps (Planned)
+
+- Choropleth map for live data
+- Add full country names
+- Sortable publication table with % shares
+- Year-over-year growth animation (optional)
+
+---
+
+## Maintainer
+
+Jawwad Sarfraz
+MSc Thesis, Kiel University
+Topic: "Dashboard for analyzing global scientific productivity using OpenAlex"
