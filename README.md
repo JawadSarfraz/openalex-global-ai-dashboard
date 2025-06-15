@@ -25,7 +25,7 @@ openalex-global-ai-dashboard/
 ├── services/                # Live API integration modules
 │   └── openalex_api.py      # Query OpenAlex with filters
 ├── visualizations/          # Scripts to generate visualizations
-│   └── outputs/             # Charts and map HTMLs
+    └── outputs/             # Charts and map HTMLs
 ```
 
 ---
@@ -35,12 +35,14 @@ openalex-global-ai-dashboard/
 Script: `services/openalex_api.py`
 
 - Dynamically fetches publication data from OpenAlex using `mailto`-compliant headers.
+
 - Accepts:
 
   - Concept ID (AI or DL)
   - Year range (from slider input)
 
 - Aggregates publication counts by country.
+
 - Used by `dashboard/app.py` to show real-time data tables and CSV downloads.
 
 ---
@@ -117,7 +119,8 @@ Features:
 
 - Dynamic year range selector (2010–2020)
 - Realtime data fetch from OpenAlex
-- DataFrame view + CSV export
+- Country code cleanup + name translation
+- Sortable DataFrame view + CSV export
 - Static map visualizations (2020)
 - Growth charts and trendlines
 
@@ -132,9 +135,11 @@ streamlit run dashboard/app.py
 ## Next Steps (Planned)
 
 - Choropleth map for live data
-- Add full country names
+- Add full country names (✅ Done)
 - Sortable publication table with % shares
 - Year-over-year growth animation (optional)
+- Concept ID search input
+- Deployment on cloud (with HTTPS)
 
 ---
 
