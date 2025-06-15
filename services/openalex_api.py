@@ -5,34 +5,35 @@ import pandas as pd
 from urllib.parse import quote
 
 def fetch_openalex_data(field, year_range):
-    """
-    Fetches publication counts per country from OpenAlex API for a given field and year range.
+    concept_ids = {
+        "Artificial Intelligence": "C41008148",
+        "Deep Learning": "C2778407487"
+    }
 
-    Args:
-        field (str): Either "Artificial Intelligence" or "Deep Learning"
-        year_range (tuple): (start_year, end_year)
+    concept_id = concept_ids[field]
+    year_from, year_to = year_range
 
-    Returns:
-        pd.DataFrame: DataFrame with country-wise publication counts.
-    """
-    start_year, end_year = year_range
+    # Construct OpenAlex API URL
+    base_url = "https://api.openalex.org/works"
+    filter_query = f"concepts.id:{concept_id},from_publication_date:{year_from}-01-01,to_publication_date:{year_to}-12-31"
+    group_by = "group_by=institutions.country_code"
 
-    # Build OpenAlex search query
-    query = quote(field)
-    url = f"https://api.openalex.org/works?filter=concepts.display_name.search:{query},from_publication_date:{start_year}-01-01,to_publication_date:{end_year}-12-31&group_by=authorships.institutions.country_code&per-page=200"
+    params = {
+        "filter": filter_query,
+        "group_by": "institutions.country_code",
+        "mailto": "jawadsarfraz96@gmail.com"  # real email!
+    }
 
-    response = requests.get(url)
+    headers = {
+        "User-Agent": "OpenAlex Dashboard (mailto:jawadsarfraz96@gmail.com)"
+    }
+
+    response = requests.get(base_url, params=params, headers=headers)
+
     if response.status_code != 200:
         raise Exception(f"OpenAlex API error: {response.status_code}")
 
-    results = response.json().get("group_by", [])
+    items = response.json().get("group_by", [])
+    records = [{"country_code": item["key"], "count": item["count"]} for item in items]
 
-    # Prepare DataFrame
-    records = []
-    for item in results:
-        country_code = item.get("key")
-        count = item.get("count", 0)
-        records.append({"country_code": country_code, "count": count})
-
-    df = pd.DataFrame(records)
-    return df
+    return pd.DataFrame(records)
