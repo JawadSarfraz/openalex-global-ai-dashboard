@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import pycountry
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -28,14 +29,13 @@ if "country_code" in df_live.columns:
     df_live["country_code"] = df_live["country_code"].apply(lambda x: x.split("/")[-1] if isinstance(x, str) else x)
 
 # Map readable country names
-alpha2_to_name = {
-    "US": "United States", "CN": "China", "DE": "Germany", "IN": "India", "GB": "United Kingdom",
-    "FR": "France", "JP": "Japan", "KR": "South Korea", "IT": "Italy", "ES": "Spain",
-    "CA": "Canada", "AU": "Australia", "BR": "Brazil", "RU": "Russia", "NL": "Netherlands",
-    "CH": "Switzerland", "SE": "Sweden", "PL": "Poland", "TR": "Turkey", "IR": "Iran",
-    # Add more as needed
-}
-df_live["country_name"] = df_live["country_code"].map(alpha2_to_name).fillna(df_live["country_code"])
+def get_country_name(alpha2_code):
+    try:
+        return pycountry.countries.get(alpha_2=alpha2_code).name
+    except:
+        return alpha2_code  # fallback if not found
+
+df_live["country_name"] = df_live["country_code"].apply(get_country_name)
 
 # Handle empty API response
 if df_live.empty:
