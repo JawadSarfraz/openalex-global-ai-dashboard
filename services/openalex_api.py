@@ -28,7 +28,15 @@ def fetch_openalex_data(concept_id, year_range):
         raise Exception(f"OpenAlex API error: {response.status_code}")
 
     items = response.json().get("group_by", [])
-    records = [{"country_code": item["key"], "count": item["count"]} for item in items]
+    records = []
+    for item in items:
+        record = {"country_code": item["key"], "count": item["count"]}
+        # Try to get citation count if available
+        if "cited_by_count" in item:
+            record["cited_by_count"] = item["cited_by_count"]
+        else:
+            record["cited_by_count"] = None
+        records.append(record)
 
     return pd.DataFrame(records)
 
