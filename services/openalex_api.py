@@ -37,3 +37,32 @@ def fetch_openalex_data(field, year_range):
     records = [{"country_code": item["key"], "count": item["count"]} for item in items]
 
     return pd.DataFrame(records)
+
+def fetch_openalex_concepts(per_page=50, max_pages=5):
+    """
+    Fetch a list of available research fields (concepts) from OpenAlex.
+    Returns a list of dicts: [{"id": ..., "display_name": ...}, ...]
+    """
+    base_url = "https://api.openalex.org/concepts"
+    params = {
+        "per-page": per_page,
+        "mailto": "jawadsarfraz96@gmail.com"
+    }
+    headers = {
+        "User-Agent": "OpenAlex Dashboard (mailto:jawadsarfraz96@gmail.com)"
+    }
+    concepts = []
+    for page in range(1, max_pages + 1):
+        params["page"] = page
+        response = requests.get(base_url, params=params, headers=headers)
+        if response.status_code != 200:
+            break
+        results = response.json().get("results", [])
+        if not results:
+            break
+        for c in results:
+            concepts.append({
+                "id": c["id"],
+                "display_name": c["display_name"]
+            })
+    return concepts
