@@ -4,13 +4,7 @@ import requests
 import pandas as pd
 from urllib.parse import quote
 
-def fetch_openalex_data(field, year_range):
-    concept_ids = {
-        "Artificial Intelligence": "C41008148",
-        "Deep Learning": "C2778407487"
-    }
-
-    concept_id = concept_ids[field]
+def fetch_openalex_data(concept_id, year_range):
     year_from, year_to = year_range
 
     # Construct OpenAlex API URL
