@@ -97,13 +97,17 @@ else:
     # --- Table Display ---
     st.subheader(f"🌍 Publications by Country ({year_from}–{year_to}) - {field_display}")
     table_cols = ["country_name", "count", "share (%)"]
-    if "cited_by_count" in df_live.columns:
+    show_citations = False
+    if "cited_by_count" in df_live.columns and df_live["cited_by_count"].notnull().any():
         table_cols.append("cited_by_count")
+        show_citations = True
     st.dataframe(
         df_live[table_cols]
         .sort_values(by="count", ascending=False)
         .reset_index(drop=True)
     )
+    if not show_citations:
+        st.info("Citation data is not available for grouped country queries in OpenAlex API.")
 
     # --- Divider ---
     st.markdown("---")
