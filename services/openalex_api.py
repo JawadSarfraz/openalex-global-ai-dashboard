@@ -68,3 +68,24 @@ def fetch_openalex_concepts(per_page=50, max_pages=5):
                 "display_name": c["display_name"]
             })
     return concepts
+
+def fetch_country_citations(concept_id, country_code, year_range):
+    """
+    Fetch total citations for a given concept, country, and year range for a specific country.
+    """
+    year_from, year_to = year_range
+    base_url = "https://api.openalex.org/works"
+    filter_query = f"concepts.id:{concept_id},institutions.country_code:{country_code},from_publication_date:{year_from}-01-01,to_publication_date:{year_to}-12-31"
+    params = {
+        "filter": filter_query,
+        "per-page": 1,  # We only need the meta info
+        "mailto": "jawadsarfraz96@gmail.com"
+    }
+    headers = {
+        "User-Agent": "OpenAlex Dashboard (mailto:jawadsarfraz96@gmail.com)"
+    }
+    response = requests.get(base_url, params=params, headers=headers)
+    if response.status_code != 200:
+        return None
+    meta = response.json().get("meta", {})
+    return meta.get("cited_by_count", None)
