@@ -54,15 +54,16 @@ df_live = df_live.dropna(subset=["iso_a3"])
 total_count = df_live["count"].sum()
 df_live["share (%)"] = round((df_live["count"] / total_count) * 100, 2)
 
-# --- Fetch Citation Data Per Country ---
+# --- Fetch Citation Data for Top 5 Countries Only ---
+df_live_sorted = df_live.sort_values(by="count", ascending=False).reset_index(drop=True)
+top5_countries = df_live_sorted.head(5)["country_code"].tolist()
 citation_data = {}
-with st.spinner("Fetching citation data per country (may take a few seconds)..."):
-    for idx, row in df_live.iterrows():
-        country_code = row["country_code"]
+with st.spinner("Fetching citation data for top 5 countries (may take a few seconds)..."):
+    for country_code in top5_countries:
         citations = fetch_country_citations(selected_concept_id, country_code, (year_from, year_to))
         citation_data[country_code] = citations
-
-df_live["total_citations"] = df_live["country_code"].map(citation_data)
+# Set citation data for top 5, None for others
+df_live["total_citations"] = df_live["country_code"].apply(lambda x: citation_data.get(x, None))
 
 # --- Citation Data ---
 if df_live["total_citations"].notnull().any():
@@ -112,8 +113,7 @@ else:
         .sort_values(by="count", ascending=False)
         .reset_index(drop=True)
     )
-    if df_live["total_citations"].isnull().all():
-        st.info("Citation data could not be fetched for some or all countries.")
+    st.info("Citation data is fetched only for the top 5 countries by publication count. Others are not fetched to optimize performance.")
 
     # --- Divider ---
     st.markdown("---")
