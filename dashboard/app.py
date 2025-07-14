@@ -9,7 +9,7 @@ import json
 import streamlit.components.v1 as components
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from services.openalex_api import fetch_openalex_data, fetch_openalex_concepts
+from services.openalex_api import fetch_openalex_data, fetch_openalex_concepts, fetch_country_citations
 
 st.set_page_config(layout="wide")
 st.title("📊 Global Research Dashboard: AI & Deep Learning (2010–2020)")
@@ -54,10 +54,20 @@ df_live = df_live.dropna(subset=["iso_a3"])
 total_count = df_live["count"].sum()
 df_live["share (%)"] = round((df_live["count"] / total_count) * 100, 2)
 
+# --- Fetch Citation Data Per Country ---
+citation_data = {}
+with st.spinner("Fetching citation data per country (may take a few seconds)..."):
+    for idx, row in df_live.iterrows():
+        country_code = row["country_code"]
+        citations = fetch_country_citations(selected_concept_id, country_code, (year_from, year_to))
+        citation_data[country_code] = citations
+
+df_live["total_citations"] = df_live["country_code"].map(citation_data)
+
 # --- Citation Data ---
-if "cited_by_count" in df_live.columns and df_live["cited_by_count"].notnull().any():
-    total_citations = df_live["cited_by_count"].sum()
-    avg_citations = (df_live["cited_by_count"] / df_live["count"]).mean()
+if df_live["total_citations"].notnull().any():
+    total_citations = df_live["total_citations"].sum()
+    avg_citations = (df_live["total_citations"] / df_live["count"]).mean()
 else:
     total_citations = None
     avg_citations = None
@@ -96,18 +106,14 @@ else:
 
     # --- Table Display ---
     st.subheader(f"🌍 Publications by Country ({year_from}–{year_to}) - {field_display}")
-    table_cols = ["country_name", "count", "share (%)"]
-    show_citations = False
-    if "cited_by_count" in df_live.columns and df_live["cited_by_count"].notnull().any():
-        table_cols.append("cited_by_count")
-        show_citations = True
+    table_cols = ["country_name", "count", "share (%)", "total_citations"]
     st.dataframe(
         df_live[table_cols]
         .sort_values(by="count", ascending=False)
         .reset_index(drop=True)
     )
-    if not show_citations:
-        st.info("Citation data is not available for grouped country queries in OpenAlex API.")
+    if df_live["total_citations"].isnull().all():
+        st.info("Citation data could not be fetched for some or all countries.")
 
     # --- Divider ---
     st.markdown("---")
