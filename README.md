@@ -150,3 +150,9 @@ streamlit run dashboard/app.py
 Jawwad Sarfraz
 MSc Thesis, Kiel University
 Topic: "Dashboard for analyzing global scientific productivity using OpenAlex"
+
+## New Feature: Citation Data by Country
+
+- The dashboard now fetches and displays total citation counts per country for the selected research field and year range.
+- Citation data is retrieved using the OpenAlex API meta information for each country and is shown in both the summary metrics and the country table.
+- If citation data is unavailable for a country, this is indicated in the dashboard.
