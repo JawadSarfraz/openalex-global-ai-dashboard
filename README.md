@@ -156,3 +156,37 @@ Topic: "Dashboard for analyzing global scientific productivity using OpenAlex"
 - The dashboard now fetches and displays total citation counts per country for the selected research field and year range.
 - Citation data is retrieved using the OpenAlex API meta information for each country and is shown in both the summary metrics and the country table.
 - If citation data is unavailable for a country, this is indicated in the dashboard.
+
+## New Feature: Research Specialization Analysis
+
+- **Specialization Ratio Calculation**: Normalizes field-specific publications against total publications across all fields
+- **Formula**: Specialization (%) = (Field Publications / Total Publications) × 100
+- **Purpose**: Shows which countries are truly specializing in specific research fields, regardless of their total research volume
+- **Implementation**:
+  - New API function `fetch_total_publications_by_country()` to get total publication counts
+  - Tabbed interface in dashboard with "Publication Counts" and "Specialization Analysis" views
+  - Interactive bar charts showing top specialized countries
+  - CSV export for both publication counts and specialization data
+  - LaTeX table generation for thesis inclusion
+
+### Key Findings from Specialization Analysis:
+
+**AI Specialization (2010-2020):**
+
+- **Macao** leads with 23.33% specialization (5,791 AI publications out of 24,827 total)
+- **China** shows 15.62% specialization despite massive total volume
+- **Smaller countries** (Singapore, Hong Kong, UAE) achieve high specialization through focused research
+
+**Deep Learning Specialization (2010-2020):**
+
+- Much lower specialization ratios (max 0.84%) compared to AI
+- Suggests Deep Learning is still emerging as a research field
+- **China** leads with 0.37% specialization
+
+### Files Generated:
+
+- `data/analysis/artificial_intelligence_specialization_analysis.csv`
+- `data/analysis/deep_learning_specialization_analysis.csv`
+- `thesis_tables/artificial_intelligence_table.tex`
+- `thesis_tables/deep_learning_table.tex`
+- `thesis_tables/analysis_summary.md`
