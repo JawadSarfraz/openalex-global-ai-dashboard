@@ -9,7 +9,7 @@ import json
 import streamlit.components.v1 as components
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from services.openalex_api import fetch_openalex_data, fetch_openalex_concepts, fetch_country_citations
+from services.openalex_api import fetch_openalex_data, fetch_openalex_concepts, fetch_country_citations, fetch_total_publications_by_country
 
 st.set_page_config(layout="wide")
 st.title("📊 Global Research Dashboard: AI & Deep Learning (2010–2020)")
@@ -28,11 +28,19 @@ year_from, year_to = year_range
 # --- Load OpenAlex Data ---
 data_load_state = st.text("Loading data from OpenAlex...")
 df_live = fetch_openalex_data(selected_concept_id, (year_from, year_to))
+
+# --- Load Total Publications Data for Normalization ---
+with st.spinner("Loading total publications data for specialization analysis..."):
+    df_total = fetch_total_publications_by_country((year_from, year_to))
 data_load_state.text("✓ Live data loaded successfully")
 
 # --- Clean and Format Data ---
 if "country_code" in df_live.columns:
     df_live["country_code"] = df_live["country_code"].apply(lambda x: x.split("/")[-1] if isinstance(x, str) else x)
+
+# Also clean country codes in df_total
+if "country_code" in df_total.columns:
+    df_total["country_code"] = df_total["country_code"].apply(lambda x: x.split("/")[-1] if isinstance(x, str) else x)
 
 def get_country_name(alpha2_code):
     try:
@@ -46,6 +54,13 @@ def alpha2_to_alpha3(alpha2):
     except:
         return None
 
+# --- Calculate Specialization Ratio FIRST ---
+# Merge with total publications data before any other processing
+df_live = df_live.merge(df_total, on="country_code", how="left")
+df_live["specialization_ratio"] = round((df_live["count"] / df_live["total_publications"]) * 100, 2)
+df_live["specialization_ratio"] = df_live["specialization_ratio"].fillna(0)
+
+# --- Now add country names and ISO codes ---
 df_live["country_name"] = df_live["country_code"].apply(get_country_name)
 df_live["iso_a3"] = df_live["country_code"].apply(alpha2_to_alpha3)
 df_live = df_live.dropna(subset=["iso_a3"])
@@ -107,13 +122,50 @@ else:
 
     # --- Table Display ---
     st.subheader(f"🌍 Publications by Country ({year_from}–{year_to}) - {field_display}")
-    table_cols = ["country_name", "count", "share (%)", "total_citations"]
-    st.dataframe(
-        df_live[table_cols]
-        .sort_values(by="count", ascending=False)
-        .reset_index(drop=True)
-    )
-    st.info("Citation data is fetched only for the top 5 countries by publication count. Others are not fetched to optimize performance.")
+    
+    # Create tabs for different views
+    tab1, tab2 = st.tabs(["📊 Publication Counts", "🎯 Specialization Analysis"])
+    
+    with tab1:
+        table_cols = ["country_name", "count", "share (%)", "total_citations"]
+        st.dataframe(
+            df_live[table_cols]
+            .sort_values(by="count", ascending=False)
+            .reset_index(drop=True)
+        )
+        st.info("Citation data is fetched only for the top 5 countries by publication count. Others are not fetched to optimize performance.")
+    
+    with tab2:
+        # Specialization analysis table
+        specialization_cols = ["country_name", "count", "total_publications", "specialization_ratio"]
+        df_specialization = df_live[specialization_cols].copy()
+        df_specialization = df_specialization.sort_values(by="specialization_ratio", ascending=False).reset_index(drop=True)
+        
+        st.markdown("### 🎯 Research Specialization Analysis")
+        st.markdown("**Specialization Ratio** = (Field Publications / Total Publications) × 100")
+        st.markdown("This shows which countries are truly specializing in this research field, regardless of their total research volume.")
+        
+        # Debug info
+        st.write(f"Total countries in dataset: {len(df_specialization)}")
+        st.write(f"Countries with count > 0: {len(df_specialization[df_specialization['count'] > 0])}")
+        st.write(f"Countries with specialization > 0: {len(df_specialization[df_specialization['specialization_ratio'] > 0])}")
+        
+        st.dataframe(df_specialization)
+        
+        # Show top 10 specialized countries
+        st.markdown("### 🏆 Top 10 Countries by Specialization")
+        top_specialized = df_specialization.head(10)
+        st.dataframe(top_specialized)
+        
+        # Create a bar chart for top specialized countries
+        fig, ax = plt.subplots(figsize=(12, 6))
+        top_specialized_chart = top_specialized.head(10)
+        ax.barh(top_specialized_chart["country_name"], top_specialized_chart["specialization_ratio"])
+        ax.set_xlabel("Specialization Ratio (%)")
+        ax.set_title(f"Top 10 Countries by {field_display} Specialization ({year_from}–{year_to})")
+        ax.invert_yaxis()
+        plt.tight_layout()
+        st.pyplot(fig)
 
     # --- Divider ---
     st.markdown("---")
@@ -135,12 +187,25 @@ else:
 
     # --- CSV Download ---
     st.subheader("📥 Download Fetched Data (CSV)")
-    st.download_button(
-        label=f"Download {field_display} Data ({year_from}–{year_to}) as CSV",
-        data=df_live[table_cols].to_csv(index=False).encode('utf-8'),
-        file_name=f"{field_display.lower().replace(' ', '_')}_openalex_{year_from}_{year_to}.csv",
-        mime="text/csv"
-    )
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.download_button(
+            label=f"Download Publication Counts ({year_from}–{year_to})",
+            data=df_live[table_cols].to_csv(index=False).encode('utf-8'),
+            file_name=f"{field_display.lower().replace(' ', '_')}_publications_{year_from}_{year_to}.csv",
+            mime="text/csv"
+        )
+    
+    with col2:
+        specialization_export_cols = ["country_name", "count", "total_publications", "specialization_ratio", "share (%)"]
+        st.download_button(
+            label=f"Download Specialization Analysis ({year_from}–{year_to})",
+            data=df_live[specialization_export_cols].to_csv(index=False).encode('utf-8'),
+            file_name=f"{field_display.lower().replace(' ', '_')}_specialization_{year_from}_{year_to}.csv",
+            mime="text/csv"
+        )
 
     st.markdown("---")
     st.caption("Dashboard for thesis: Development of a dashboard for analyzing global scientific productivity (2010–2020)")
