@@ -40,6 +40,39 @@ def fetch_openalex_data(concept_id, year_range):
 
     return pd.DataFrame(records)
 
+def fetch_total_publications_by_country(year_range):
+    """
+    Fetch total publications across ALL fields for each country in the given year range.
+    This is used for normalization to calculate specialization ratios.
+    """
+    year_from, year_to = year_range
+    
+    base_url = "https://api.openalex.org/works"
+    filter_query = f"from_publication_date:{year_from}-01-01,to_publication_date:{year_to}-12-31"
+    
+    params = {
+        "filter": filter_query,
+        "group_by": "institutions.country_code",
+        "mailto": "jawadsarfraz96@gmail.com"
+    }
+    
+    headers = {
+        "User-Agent": "OpenAlex Dashboard (mailto:jawadsarfraz96@gmail.com)"
+    }
+    
+    response = requests.get(base_url, params=params, headers=headers)
+    
+    if response.status_code != 200:
+        raise Exception(f"OpenAlex API error: {response.status_code}")
+    
+    items = response.json().get("group_by", [])
+    records = []
+    for item in items:
+        record = {"country_code": item["key"], "total_publications": item["count"]}
+        records.append(record)
+    
+    return pd.DataFrame(records)
+
 def fetch_openalex_concepts(per_page=50, max_pages=5):
     """
     Fetch a list of available research fields (concepts) from OpenAlex.
