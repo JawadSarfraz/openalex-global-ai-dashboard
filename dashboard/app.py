@@ -24,7 +24,7 @@ PREDEFINED_CONCEPTS = {
     "Deep Learning": "C108583219"
 }
 
-# Comment out the dynamic field selector for backup
+# Comment out the dynamic field selector 
 # with st.spinner("Fetching available research fields from OpenAlex..."):
 #     concepts = fetch_openalex_concepts(per_page=50, max_pages=5)
 #     concept_options = {c["display_name"]: c["id"] for c in concepts}
@@ -197,6 +197,15 @@ else:
         fill_opacity=0.7,
         line_opacity=0.2,
         legend_name=f"{field_display} Publications ({year_from}–{year_to})",
+        nan_fill_color="#ffffff",     # <<< No-data countries = WHITE
+        nan_fill_opacity=1.0          
+    ).add_to(m)
+
+    folium.TileLayer(
+        tiles="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attr="&copy; OpenStreetMap contributors &copy; CARTO",
+        name="CartoDB Positron",
+        control=False
     ).add_to(m)
 
     map_path = "visualizations/outputs/live_map.html"
